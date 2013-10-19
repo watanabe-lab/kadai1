@@ -11,6 +11,7 @@ class Packet < Controller
   def packet_in dpid, message 
     in_port = message.in_port
     out_port = @fdb_port[message.macda] 
+puts "(" + message.macda.to_s + ")"
     print_packet(in_port, out_port)
     @fdb_port[message.macsa] = in_port
     if out_port
