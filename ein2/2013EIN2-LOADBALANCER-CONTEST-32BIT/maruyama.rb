@@ -1,7 +1,9 @@
+require "pp"
 class Packet < Controller
 
   def start
     @fdb_port = {} 
+    puts "maruyama.rb start!"
   end
   
   def switch_ready dpid  
@@ -11,12 +13,23 @@ class Packet < Controller
   def packet_in dpid, message 
     in_port = message.in_port
     out_port = @fdb_port[message.macda] 
-puts "(" + message.macda.to_s + ")"
+if message.arp_request?
+  puts "arp request!"
+  puts message.arp_tha.to_s
+  puts message.arp_tpa.to_s
+end
+if message.arp_reply?
+  puts "arp reply!"
+end
+if message.ipv4?
+  puts "ipv4.dest_address: " + message.ipv4_daddr.to_s
+end
     print_packet(in_port, out_port)
     @fdb_port[message.macsa] = in_port
     if out_port
-      flow_add(out_port, message)
-      send_packet(dpid, message)
+puts " OK : (" + message.macda.to_s + ", " + out_port.to_s + ")"
+      flow_add(dpid, message, out_port)
+      send_packet(dpid, message, out_port)
     else
       flood_packet(dpid, message)
     end
@@ -24,18 +37,18 @@ puts "(" + message.macda.to_s + ")"
 
   private
 
-  def flow_add dpid, message
+  def flow_add dpid, message, out_port
     send_flow_mod_add(
       dpid,
       :match => Match.from(message, :in_port, :nw_src, :nw_dst),
-      :actions => SendOutPort.new(dpid))
+      :actions => SendOutPort.new(out_port))
   end
 
-  def send_packet dpid, message
+  def send_packet dpid, message, out_port
     send_packet_out(
       dpid,
       :packet_in => message,
-      :actions => Trema::SendOutPort.new(dpid))
+      :actions => Trema::SendOutPort.new(out_port))
   end
 
   def flood_packet dpid, message
