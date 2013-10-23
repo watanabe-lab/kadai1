@@ -7,7 +7,7 @@ require 'pp'
 require 'open3'
 
 TREMA = "trema"
-WTIME = 10 
+WTIME = 5
 CLIENT = "./bin/client"
 SERVER = "./bin/server"
 DIR_HP_FILE = "/tmp/"

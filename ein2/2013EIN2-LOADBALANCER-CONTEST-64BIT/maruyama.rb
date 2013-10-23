@@ -48,7 +48,7 @@ class Packet < Controller
     if out_port
       puts "(" + in_port.to_s + ", " + out_port.to_s + ")"
     else
-      puts "(" + in_port.to_s + ", " + unknown port + ")"
+      puts "(" + in_port.to_s + ", unknown port)"
     end
   end
 end
