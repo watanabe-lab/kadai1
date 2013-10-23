@@ -1,0 +1,308 @@
+UTE: trema run maruyama.rb -c conf/network.conf
+
+maruyama.rb start!
+START  : servers
+
+start switch 0x1
+(4, unknown port)
+(2, unknown port)
+(2, unknown port)
+(5, unknown port)
+(5, unknown port)
+(15, unknown port)
+(4, unknown port)
+(12, unknown port)
+(15, unknown port)
+(14, unknown port)
+(3, unknown port)
+(2, unknown port)
+(12, unknown port)
+(13, unknown port)
+(5, unknown port)
+(4, unknown port)
+(12, unknown port)
+(9, unknown port)
+(2, unknown port)
+(14, unknown port)
+(1, unknown port)
+(13, unknown port)
+(1, unknown port)
+(9, unknown port)
+(15, unknown port)
+(3, unknown port)
+(11, unknown port)
+(11, unknown port)
+(10, unknown port)
+(12, unknown port)
+(8, unknown port)
+(14, unknown port)
+(8, unknown port)
+(7, unknown port)
+(13, unknown port)
+(13, unknown port)
+(1, unknown port)
+(9, unknown port)
+(3, unknown port)
+(10, unknown port)
+(6, unknown port)
+(8, unknown port)
+(11, unknown port)
+(3, unknown port)
+(7, unknown port)
+(6, unknown port)
+(10, unknown port)
+(5, unknown port)
+(8, unknown port)
+(11, unknown port)
+(14, unknown port)
+(7, unknown port)
+(6, unknown port)
+(2, unknown port)
+(5, unknown port)
+(4, unknown port)
+(15, unknown port)
+(12, unknown port)
+(4, unknown port)
+(1, unknown port)
+(3, unknown port)
+(9, unknown port)
+(13, unknown port)
+(14, unknown port)
+(6, unknown port)
+(11, unknown port)
+(10, unknown port)
+(15, unknown port)
+(8, unknown port)
+(10, unknown port)
+(7, unknown port)
+(6, unknown port)
+(2, unknown port)
+(5, unknown port)
+(4, unknown port)
+(15, unknown port)
+(12, unknown port)
+(9, unknown port)
+(14, unknown port)
+(13, unknown port)
+(1, unknown port)
+(9, unknown port)
+(3, unknown port)
+(7, unknown port)
+(11, unknown port)
+(1, unknown port)
+(10, unknown port)
+(8, unknown port)
+(7, unknown port)
+(6, unknown port)
+START  : clients
+
+arp request!
+(2, unknown port)
+arp request!
+(3, unknown port)
+arp request!
+(5, unknown port)
+arp request!
+(1, unknown port)
+arp request!
+(4, unknown port)
+arp request!
+(9, unknown port)
+arp reply!
+(11, 2)
+ OK : (7a:26:6b:ed:36:95, 2)
+arp request!
+(12, unknown port)
+arp request!
+(13, unknown port)
+arp request!
+(14, unknown port)
+arp request!
+(15, unknown port)
+ipv4.dest_address: 192.168.0.250
+(2, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 3)
+ OK : (3e:a9:92:8b:e1:f1, 3)
+ipv4.dest_address: 192.168.0.250
+(3, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 5)
+ OK : (d2:e8:9a:a0:03:7e, 5)
+ipv4.dest_address: 192.168.0.250
+(5, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 1)
+ OK : (26:43:6b:52:ea:26, 1)
+ipv4.dest_address: 192.168.0.250
+(1, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 4)
+ OK : (52:a9:80:62:86:9c, 4)
+ipv4.dest_address: 192.168.0.250
+(4, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 9)
+ OK : (5a:c7:d3:a7:84:7c, 9)
+ipv4.dest_address: 192.168.0.250
+(9, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 12)
+ OK : (e2:aa:c6:f4:8a:77, 12)
+arp reply!
+(11, 13)
+ OK : (4a:db:84:13:1a:3a, 13)
+ipv4.dest_address: 192.168.0.250
+(12, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 14)
+ OK : (32:ae:a5:37:d1:33, 14)
+ipv4.dest_address: 192.168.0.250
+(13, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(11, 15)
+ OK : (46:80:f4:ef:bf:01, 15)
+ipv4.dest_address: 192.168.0.250
+(14, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+ipv4.dest_address: 192.168.0.2
+(11, 2)
+ OK : (7a:26:6b:ed:36:95, 2)
+ipv4.dest_address: 192.168.0.250
+(15, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+ipv4.dest_address: 192.168.0.7
+(11, 3)
+ OK : (3e:a9:92:8b:e1:f1, 3)
+ipv4.dest_address: 192.168.0.3
+(11, 5)
+ OK : (d2:e8:9a:a0:03:7e, 5)
+ipv4.dest_address: 192.168.0.10
+(11, 1)
+ OK : (26:43:6b:52:ea:26, 1)
+ipv4.dest_address: 192.168.0.1
+(11, 4)
+ OK : (52:a9:80:62:86:9c, 4)
+ipv4.dest_address: 192.168.0.9
+(11, 9)
+ OK : (5a:c7:d3:a7:84:7c, 9)
+ipv4.dest_address: 192.168.0.5
+(11, 12)
+ OK : (e2:aa:c6:f4:8a:77, 12)
+ipv4.dest_address: 192.168.0.8
+(11, 13)
+ OK : (4a:db:84:13:1a:3a, 13)
+ipv4.dest_address: 192.168.0.6
+(11, 14)
+ OK : (32:ae:a5:37:d1:33, 14)
+ipv4.dest_address: 192.168.0.4
+(11, 15)
+ OK : (46:80:f4:ef:bf:01, 15)
+arp request!
+(11, 2)
+ OK : (7a:26:6b:ed:36:95, 2)
+arp reply!
+(2, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(11, 3)
+ OK : (3e:a9:92:8b:e1:f1, 3)
+arp reply!
+(3, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(11, 5)
+ OK : (d2:e8:9a:a0:03:7e, 5)
+arp reply!
+(5, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(11, 1)
+ OK : (26:43:6b:52:ea:26, 1)
+arp reply!
+(1, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(11, 4)
+ OK : (52:a9:80:62:86:9c, 4)
+arp reply!
+(4, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(11, 9)
+ OK : (5a:c7:d3:a7:84:7c, 9)
+arp reply!
+(9, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(11, 12)
+ OK : (e2:aa:c6:f4:8a:77, 12)
+arp request!
+(11, 13)
+ OK : (4a:db:84:13:1a:3a, 13)
+arp request!
+(11, 14)
+ OK : (32:ae:a5:37:d1:33, 14)
+arp request!
+(11, 15)
+ OK : (46:80:f4:ef:bf:01, 15)
+arp reply!
+(12, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(13, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(14, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp reply!
+(15, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(15, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(4, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(3, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(12, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(2, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(13, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(5, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(14, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(1, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+arp request!
+(9, 11)
+ OK : (52:84:36:ec:d5:be, 11)
+---------- Score ----------
+ Score: 4949.000000
+ Score: 0.000000
+ Score: 0.000000
+ Score: 0.000000
+ Score: 0.000000
+---------------------------
+ Total: 4949.000000
+---------------------------
+

@@ -18,6 +18,7 @@ PID_FILE_PREFIX_CLIENT = "client."
 PID_FILE_PREFIX_SERVER = "server."
 PID_DIR_PATH = PID_PATH + PID_DIR + "/"
 
+DATA = "~/hoge"
 
 $pids_s = []
 $pids_c = []
@@ -146,7 +147,8 @@ puts
 
 ## Start trema as daemon
 ## to kill easily by invoking "trema killall"
-cmd = TREMA + " run " + ARGV[1] + " -c " + ARGV[2] + " -d"
+# yukika
+cmd = TREMA + " run " + ARGV[1] + " -c " + ARGV[2]  
 Thread.new  {
   pid = fork {
     begin

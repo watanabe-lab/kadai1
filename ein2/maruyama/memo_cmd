@@ -1,0 +1,52 @@
+onfiguration ------------
+ + trema
+ |-> path     : trema
+ |-> controler: maruyama.rb
+ `-> network  : conf/network.conf
+ + sever-client
+ `-> config   : conf/level-1.conf
+ + PID
+ |-> server   : /tmp/OpenFlow-LB/server.*
+ `-> client   : /tmp/OpenFlow-LB/client.*
+---------------------------------------
+
+KILL   : all processes
+
+DELETE : /tmp/server_192.168.0.251_2e:c9:2c:4c:2e:eb
+DELETE : /tmp/server_192.168.0.254_36:30:8d:2e:26:00
+DELETE : /tmp/server_192.168.0.252_16:63:3a:05:35:28
+DELETE : /tmp/server_192.168.0.250_be:45:ec:4e:28:db
+DELETE : /tmp/server_192.168.0.253_12:6b:f7:38:1d:f3
+
+trema run maruyama.rb -c conf/network.conf -d
+EXECUTE: trema run maruyama.rb -c conf/network.conf -d
+
+START  : servers
+
+START  : clients
+
+ip netns exec netns0 ./bin/client 192.168.0.1 conf/level-1.conf
+ip netns exec netns1 ./bin/client 192.168.0.2 conf/level-1.conf
+ip netns exec netns2 ./bin/client 192.168.0.3 conf/level-1.conf
+ip netns exec netns4 ./bin/client 192.168.0.5 conf/level-1.conf
+ip netns exec netns5 ./bin/client 192.168.0.6 conf/level-1.conf
+ip netns exec netns7 ./bin/client 192.168.0.8 conf/level-1.conf
+ip netns exec netns6 ./bin/client 192.168.0.7 conf/level-1.conf
+ip netns exec netns8 ./bin/client 192.168.0.9 conf/level-1.conf
+ip netns exec netns3 ./bin/client 192.168.0.4 conf/level-1.conf
+ip netns exec netns9 ./bin/client 192.168.0.10 conf/level-1.conf
+---------- Score ----------
+ ip netns exec netns10 ./bin/server 192.168.0.250 12345 10000 20 5
+ Score: 5023.000000
+ ip netns exec netns11 ./bin/server 192.168.0.251 12345 10000 20 5
+ Score: 0.000000
+ ip netns exec netns12 ./bin/server 192.168.0.252 12345 10000 0 1
+ Score: 0.000000
+ ip netns exec netns13 ./bin/server 192.168.0.253 12345 10000 0 1
+ Score: 0.000000
+ ip netns exec netns14 ./bin/server 192.168.0.254 12345 10000 0 1
+ Score: 0.000000
+---------------------------
+ Total: 5023.000000
+---------------------------
+
