@@ -11,32 +11,16 @@ class LoadBarancerForLevel1 < Controller
     @fdb = {}   
     # hash key is IP address(to strings), value is port number
     @server_list = {}
-    # for make server list
+    # for making server list
     @initiate_arp_count = 0
     @counter = Counter.new
-    # following are for debug 
-    @unknown_packet = 0
-    @arp_request = 0
-    @arp_reply = 0
-    @data_packet = 0
-    @packet_type = ""
-    @packet_num = 0
   end
 
-  def switch_ready dpid
-    puts dpid.to_hex
-  end
-
-  def packet_in dpid, message
+   def packet_in dpid, message
     # update FDB
     @fdb[message.macsa] = message.in_port
     port = @fdb[message.macda]
-    #puts ""
-    #puts "Update FDB!"
-    # @fdb.each do | macsa, port_num |
-    #  print "ポート番号：" + port_num.to_s
-    #  puts "   MACアドレス：" + macsa.to_s
-    #end
+
     if message.arp_request?
       handle_arp_request(dpid, message, port)
     elsif message.arp_reply?
@@ -57,40 +41,30 @@ class LoadBarancerForLevel1 < Controller
 
 
   def handle_initiate_packet(dpid)
+    # send ARP Request to each server
     if @initiate_arp_count < 5
       last_ip = 250 + @initiate_arp_count
       @initiate_arp_count += 1
       tpa = "192.168.0." + last_ip.to_s
-      arp_request = create_arp_request_from(Mac.new("00:00:00:00:00:00"), IPAddr.new(tpa), IPAddr.new("192.168.0.50"))
+      arp_request = create_arp_request_from(
+                                            Mac.new("00:00:00:00:00:00"), 
+                                            IPAddr.new(tpa), 
+                                            IPAddr.new("192.168.0.50")
+                                            )
       send_packet_out(
                       dpid,
                       :data => arp_request,
                       :actions => SendOutPort.new(OFPP_FLOOD)
                       )
-      puts ""
-      puts "作成したARP Requestを送信。"
     end
   end
 
   def handle_arp_request(dpid, message, port)
-    puts ""
-    puts "ARP Requestを受信。"
-    puts "送信元ポート番号：" +  message.in_port.to_s
-    puts "送信元MACアドレス：" + message.arp_sha.to_s
-    puts "送信元IPアドレス：" + message.arp_spa.to_s
-    puts "宛先MACアドレス：" + message.arp_tha.to_s
-    puts "宛先IPアドレス：" + message.arp_tpa.to_s
     packet_flood dpid, message
   end
 
   def handle_arp_reply(dpid, message, port)
-    puts ""
-    puts "ARP Replyを受信。"
-    puts "送信元ポート番号：" + message.in_port.to_s
-    puts "送信元MACアドレス：" + message.arp_sha.to_s
-    puts "送信元IPアドレス：" + message.arp_spa.to_s
-    puts "宛先MACアドレス：" + message.arp_tha.to_s
-    puts "宛先IPアドレス：" + message.arp_tpa.to_s
+    #get server list
     if ((message.arp_spa.to_s == "192.168.0.250"\
         || message.arp_spa.to_s == "192.168.0.251"\
         || message.arp_spa.to_s == "192.168.0.252"\
@@ -98,20 +72,12 @@ class LoadBarancerForLevel1 < Controller
         || message.arp_spa.to_s == "192.168.0.254"\
         ) && @server_list.length < 5)
       @server_list[message.arp_spa.to_s] = message.arp_sha
-      puts ""
-      puts "サーバーリストを更新。"
-      print "IP：" + message.arp_spa.to_s
-      puts " MAC：" + message.arp_sha.to_s
     else
       packet_flood dpid, message
     end
   end
 
   def handle_ipv4(dpid, message, port)
-    puts ""
-    puts "IPパケットを受信。"
-    puts "送信元IPアドレス：" + message.ipv4_saddr.to_s
-    puts "宛先IPアドレス：" + message.ipv4_daddr.to_s
     if port
       flow_mod_add_to_super dpid, message, port
       packet_out_to_super dpid, message, port
@@ -131,10 +97,6 @@ class LoadBarancerForLevel1 < Controller
       saddr = message.macsa.to_s
       daddr = message.macda.to_s
     end
-    puts "フローテーブル書き込み。"
-    puts "送信元IPアドレス：" + saddr
-    puts "宛先IPアドレス：" + daddr
-    puts "宛先ポート番号：" + port.to_s
     send_flow_mod_add(
                       dpid,
                       :hard_timeout => 10,
@@ -155,6 +117,7 @@ class LoadBarancerForLevel1 < Controller
       daddr = 0
     end
     if daddr.to_s == "192.168.0.250"
+      # rewrite flow table entry to super server
       new_ip = "192.168.0.252"
       new_mac = @server_list[new_ip].to_s
       port = @fdb[@server_list["192.168.0.252"]] 
@@ -168,12 +131,8 @@ class LoadBarancerForLevel1 < Controller
                                      Trema::SendOutPort.new(port)
                                      ]
                         )
-      puts "フローテーブルの宛先を192.168.0.252に書き換え！"
-      puts "送信元IPアドレス：" + saddr.to_s
-      puts "宛先IPアドレス：" + new_ip
-      puts "宛先MACアドレス：" + new_mac.to_s
-      puts "宛先ポート番号：" + port.to_s
     else
+      # rewrite flow table entry from super server
       new_ip = "192.168.0.250"
       new_mac = @server_list[new_ip].to_s
       send_flow_mod_add(
@@ -186,10 +145,6 @@ class LoadBarancerForLevel1 < Controller
                                      Trema::SendOutPort.new(port)
                                     ]
                        )
-    puts "フローテーブルの送信元を書き換え。。"
-    puts "送信元IPアドレス：" + new_ip
-    puts "宛先IPアドレス：" + daddr.to_s
-    puts "宛先ポート番号：" + port.to_s
     end
 
 
@@ -197,7 +152,6 @@ class LoadBarancerForLevel1 < Controller
   end
 
   def packet_out(dpid, message, port)
-    output_sent_packet(message)
     send_packet_out(
                     dpid,
                     :packet_in => message,
@@ -206,7 +160,6 @@ class LoadBarancerForLevel1 < Controller
   end
 
   def packet_out_to_super(dpid, message, port)
-    output_sent_packet(message)
     if message.ipv4?
       saddr = message.ipv4_saddr
       daddr = message.ipv4_daddr
@@ -218,6 +171,7 @@ class LoadBarancerForLevel1 < Controller
       daddr = 0
     end
     if daddr.to_s == "192.168.0.250"
+      # rewrite packet to super server
       new_ip = "192.168.0.251"
       new_mac = @server_list[new_ip].to_s
       port = @fdb[@server_list["192.168.0.251"]] 
@@ -243,33 +197,6 @@ class LoadBarancerForLevel1 < Controller
     packet_out(dpid, message, OFPP_FLOOD)
   end 
 
-  def output_sent_packet(message)
-    if message.arp_request?
-      @packet_type = "ARP Request"
-      @arp_request += 1
-      @packet_num = @arp_request
-    elsif message.arp_reply?
-      @packet_type = "ARP Reply"
-      @arp_reply += 1
-      @packet_num = @arp_reply
-    elsif message.ipv4?
-      if message.ipv4_saddr.to_s == "192.168.0.251" 
-        @packet_type = "Ack for Data Packet"
-        @data_packet += 1
-        @packet_num = @data_packet
-      else
-        @packet_type = nil
-      end
-    else
-      @packet_type = "Unknown Packet"
-      @unknown_packet += 1
-      @packet_num = @unknown_packet
-    end
-    if @packet_type
-      print( "sent ", @packet_num, " ", @packet_type, "s!\n")
-    end
-  end
-
   def show_counter
     puts Time.now
     @counter.each_pair do | mac, counter |
@@ -281,14 +208,14 @@ class LoadBarancerForLevel1 < Controller
     puts ""
     puts "FDB(Forwaring Data Base) is:"
     @fdb.each do | macsa, port_num |
-      print "ポート番号：" + port_num.to_s
-      puts "   MACアドレス：" + macsa.to_s
+      print "Port Number : " + port_num.to_s
+      puts "   MAC Address : " + macsa.to_s
     end
     puts ""
-    puts "Server List is"
+    puts "Server List is:"
     @server_list.each do | ipaddress, macaddress |
-      print "IPアドレス：" + ipaddress
-      puts "   MACアドレス：" + macaddress.to_s
+      print "IP Address : " + ipaddress
+      puts "   MAC Address : " + macaddress.to_s
     end
   end
 end

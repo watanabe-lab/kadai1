@@ -1,0 +1,38 @@
+Starting...
+
+------------ Configuration ------------
+ + trema
+ |-> path     : trema
+ |-> controler: loadbalancer_level1.rb
+ `-> network  : conf/network.conf
+ + sever-client
+ `-> config   : conf/level-1.conf
+ + PID
+ |-> server   : /tmp/OpenFlow-LB/server.*
+ `-> client   : /tmp/OpenFlow-LB/client.*
+---------------------------------------
+
+KILL   : all processes
+
+DELETE : /tmp/server_192.168.0.250_86:e7:c9:28:45:d9
+DELETE : /tmp/server_192.168.0.254_7e:c8:62:68:98:29
+DELETE : /tmp/server_192.168.0.252_4a:44:f3:19:12:b1
+DELETE : /tmp/server_192.168.0.253_32:32:5e:f2:ba:0e
+DELETE : /tmp/server_192.168.0.251_ba:c4:fb:b1:c1:57
+
+EXECUTE: trema run loadbalancer_level1.rb -c conf/network.conf -d
+
+START  : servers
+
+START  : clients
+
+---------- Score ----------
+ Score: 0.000000
+ Score: 0.000000
+ Score: 98398.000000
+ Score: 0.000000
+ Score: 0.000000
+---------------------------
+ Total: 98398.000000
+---------------------------
+

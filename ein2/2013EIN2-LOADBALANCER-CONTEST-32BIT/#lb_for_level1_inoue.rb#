@@ -161,6 +161,12 @@ class LoadBarancerForLevel1 < Controller
       send_flow_mod_add(
                         dpid,
                         :hard_timeout => 10,
+                        #:match => Match.new(
+                        #                    :in_port => message.in_port,
+                        #                    :dl_src => message.macsa,
+                         #                   :nw_src => saddr
+                         #                   :nw_dst => daddr 
+                         #                   ),
                         :match => ExactMatch.from(message),
                         :actions => [
                                      Trema::SetIpDstAddr.new(new_ip),
@@ -179,6 +185,12 @@ class LoadBarancerForLevel1 < Controller
       send_flow_mod_add(
                         dpid,
                         :hard_timeout => 10,
+                        #:match => Match.new(
+                        #                    :in_port => message.in_port,
+                        #                    :dl_Src => message.macsa,
+                        #                    :nw_src => saddr,
+                        #                    :nw_dst => daddr
+                        #                    ),
                         :match => ExactMatch.from(message),
                         :actions => [
                                      Trema::SetIpSrcAddr.new(new_ip),
@@ -229,12 +241,6 @@ class LoadBarancerForLevel1 < Controller
                                    Trema::SetIpDstAddr.new(new_ip),
                                    Trema::SetEthDstAddr.new(new_mac)
                                   ]
-                      )
-    else
-      send_packet_out(
-                      dpid,
-                      :packet_in => message,
-                      :actions => Trema::SendOutPort.new( port )
                       )
     end
   end
