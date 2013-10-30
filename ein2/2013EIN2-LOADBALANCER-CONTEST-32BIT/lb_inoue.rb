@@ -175,22 +175,22 @@ class LoadBarancerForLevel1 < Controller
       puts "宛先MACアドレス：" + new_mac.to_s
       puts "宛先ポート番号：" + port.to_s
     else
-      new_ip = "192.168.0.250"
-      new_mac = @server_list[new_ip].to_s
+      #new_ip = "192.168.0.250"
+      #new_mac = @server_list[new_ip].to_s
       send_flow_mod_add(
                         dpid,
                         :hard_timeout => 10,
                         :match => ExactMatch.from(message),
-                        :actions => [
-                                     Trema::SetIpSrcAddr.new(new_ip),
-                                     Trema::SetEthSrcAddr.new(new_mac),
-                                     Trema::SendOutPort.new(port)
-                                    ]
+                        :actions => Trema::SendOutPort.new(port)#[
+                                     #Trema::SetIpSrcAddr.new(new_ip),
+                                     #Trema::SetEthSrcAddr.new(new_mac),
+                                     #Trema::SendOutPort.new(port)
+                                    #]
                        )
-    puts "フローテーブルの送信元を書き換え。。"
-    puts "送信元IPアドレス：" + new_ip
-    puts "宛先IPアドレス：" + daddr.to_s
-    puts "宛先ポート番号：" + port.to_s
+    #puts "フローテーブルの送信元を書き換え。。"
+    #puts "送信元IPアドレス：" + new_ip
+    #puts "宛先IPアドレス：" + daddr.to_s
+    #puts "宛先ポート番号：" + port.to_s
     end
 
 
