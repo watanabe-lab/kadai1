@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 require "pp"
 require "loadbalancer-utils"
 require "counter"
@@ -126,7 +126,7 @@ class LoadBarancerForLevel1 < Controller
     else
       # ACK
       # ACK確認  by河野
-      checkAck(src_ip[-1,1].to_i)
+      checkAck(ipv4_saddr[-1,1].to_i)
       src_ip = @init_connect_server
       src_mac = @fdb_ip[src_ip]
       port = @fdb_mac[message.macda.to_s] 
