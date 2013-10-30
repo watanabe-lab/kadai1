@@ -126,7 +126,7 @@ class LoadBarancerForLevel1 < Controller
     else
       # ACK
       # ACK確認  by河野
-      checkAck(ipv4_saddr[-1,1].to_i)
+      checkAck(message.ipv4_saddr.to_s[-1,1].to_i)
       src_ip = @init_connect_server
       src_mac = @fdb_ip[src_ip]
       port = @fdb_mac[message.macda.to_s] 
