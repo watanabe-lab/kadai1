@@ -117,7 +117,7 @@ class LoadBarancerForLevel1 < Controller
     action = 0
     if @server_list.include?(daddr) 
       # 送信先選択  by河野
-      dst_ip = "192.168.0.25" + @next_superserver.to_s
+      dst_ip = @server_list[@next_superserver]
       # dst_ip = @fine_server 
       dst_mac = @fdb_ip[dst_ip]
       port = @fdb_mac[dst_mac]
@@ -126,7 +126,7 @@ class LoadBarancerForLevel1 < Controller
     else
       # ACK
       # ACK確認  by河野
-      checkAck(src_ip[-1,1].to_i)
+      checkAck( @server_list.index(message.ipv4_saddr.to_s) )
       src_ip = @init_connect_server
       src_mac = @fdb_ip[src_ip]
       port = @fdb_mac[message.macda.to_s] 
