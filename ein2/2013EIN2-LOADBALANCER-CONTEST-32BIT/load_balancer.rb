@@ -15,7 +15,7 @@ class LoadBarancerForLevel1 < Controller
     @send_server_arpreq = 0 
     @target_server = "192.168.0.252"
     @reply_server = "192.168.0.250"
-    @my_ipaddr = "192.168.0.50"
+    @my_ipaddr = "192.168.1.1"
     @hard_timeout = 10
     @list_point = 0
   end
