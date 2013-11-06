@@ -17,6 +17,8 @@ class LoadBarancerForLevel1 < Controller
     @init_connect_server = "192.168.0.250"
     @my_ipaddr = "192.168.0.50"
     @hard_timeout = 10
+# kono
+    initializeServers
   end
 
   def switch_ready dpid
@@ -94,6 +96,7 @@ class LoadBarancerForLevel1 < Controller
     puts "IPv4 from " + source_ip + " to " + dest_ip
     port = @fdb_mac[message.macda.to_s]
     if port
+      selectNextServer
       send_packet_and_update_flow(dpid, message)
     else
       packet_out(dpid, message, SendOutPort.new(OFPP_FLOOD))
@@ -111,15 +114,20 @@ class LoadBarancerForLevel1 < Controller
 
   def send_packet_and_update_flow dpid, message
     daddr = message.ipv4_daddr.to_s
+    saddr = message.ipv4_saddr.to_s
     action = 0
     if @server_list.include?(daddr) 
-      dst_ip = @fine_server 
+# kono
+      dst_ip = "192.168.0.25" + @next_superserver.to_s
+      #dst_ip = @fine_server 
       dst_mac = @fdb_ip[dst_ip]
       port = @fdb_mac[dst_mac]
       action = create_action_from_dst(dst_ip, dst_mac, port)
       puts " --> to " + dst_ip
     else
       # ACK
+# kono
+      checkAck(saddr.to_s[-1, 1].to_i)
       src_ip = @init_connect_server
       src_mac = @fdb_ip[src_ip]
       port = @fdb_mac[message.macda.to_s] 
@@ -173,4 +181,40 @@ class LoadBarancerForLevel1 < Controller
     puts "Server List is"
     puts " " + @server_list.join("\n ") 
   end
+ 
+  # 変数初期化  by河野
+  def initializeServers
+    @server_totalNumber = 5  # サーバの総数。要設定
+    @window_size = 1         # [要調整]ACKを待たずに送っていいパケット数。全て落ちたら他のサーバに切り替える
+    @dual_deal_servers = 2   # [要調整]ACK待ち状態のサーバが同時にこの値になったらダウンしていると見なす
+    @next_superserver = 0    # 次の送り先となるサーバID。IPアドレスの末尾
+    @target_defserver = 0    # デフォルトの送り先となるサーバID
+    @server_waiting_packet = Array.new(@server_totalNumber, 0)  # ACK待ちパケット数を記録
+  end
+ 
+  # 送信先を選ぶ処理  by河野
+  # 返り値 : 送信先サーバのID。IPアドレスの末尾
+  def selectNextServer
+    i = @target_defserver
+    while @server_waiting_packet[i] >= @window_size
+      # 数値はACK待ちパケット数。要調整
+      i = (i + 1) % @server_totalNumber
+    end
+    @next_superserver = i
+    @server_waiting_packet[i] += 1
+    # 復活判定
+    if (i - @target_defserver + @server_totalNumber) % @server_totalNumber >= @dual_deal_servers
+      # 数値は連なったACK待ちサーバの数。要調整
+      @server_waiting_packet[@target_defserver] = 0
+      @target_defserver = (@target_defserver + 1) % @server_totalNumber
+    end
+  end
+ 
+
+  # サーバからACKを受け取った時の処理  by河野
+  # 引数 : ACKを送信したサーバのID。IPアドレスの末尾
+  def checkAck(server_id)
+    @server_waiting_packet[server_id] -= 1   # 受信待ちACK数を1つ減らす
+  end
+
 end

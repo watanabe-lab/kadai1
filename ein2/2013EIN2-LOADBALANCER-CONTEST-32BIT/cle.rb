@@ -16,7 +16,6 @@ class LoadBarancerForLevel1 < Controller
     @fine_server = "192.168.0.252"
     @init_connect_server = "192.168.0.250"
     @my_ipaddr = "192.168.0.50"
-    @hard_timeout = 10
   end
 
   def switch_ready dpid
@@ -50,10 +49,10 @@ class LoadBarancerForLevel1 < Controller
   end
 
   def handle_arp_request dpid, message
-    source_ip = message.arp_spa.to_s
-    target_ip = message.arp_tpa.to_s
-    puts "ARP Request from " + source_ip + " to " + target_ip
-    @fdb_ip[source_ip] = message.macsa.to_s
+    source_ip = message.arp_spa
+    target_ip = message.arp_tpa
+    puts "ARP Request from " + source_ip.to_s + " to " + target_ip.to_s
+    @fdb_ip[source_ip.to_s] = message.macsa.to_s
     packet_out(dpid, message, SendOutPort.new(OFPP_FLOOD))
   end
 
@@ -70,15 +69,15 @@ class LoadBarancerForLevel1 < Controller
   end
 
   def handle_arp_reply dpid, message
-    source_ip = message.arp_spa.to_s
-    target_ip = message.arp_tpa.to_s
-    puts "ARP Reply from " + source_ip + " to " + target_ip
-    @fdb_ip[source_ip] = message.macsa.to_s
-    if target_ip == @my_ipaddr
+    source_ip = message.arp_spa
+    target_ip = message.arp_tpa
+    puts "ARP Reply from " + source_ip.to_s + " to " + target_ip.to_s
+    @fdb_ip[source_ip.to_s] = message.macsa.to_s
+    if target_ip.to_s == @my_ipaddr
       update_server_list(message)
     else
-      #port = @fdb_mac[@fdb_ip[target_ip]]
-      #packet_out(dpid, message, SendOutPort.new(port))
+      #port = @fdb_mac[@fdb_ip[target_ip.to_s]]
+      #packet_out(dpid, message.data, SendOutPort.new(port))
       packet_out(dpid, message, SendOutPort.new(OFPP_FLOOD))
     end
   end
@@ -89,12 +88,12 @@ class LoadBarancerForLevel1 < Controller
   end
 
   def handle_ipv4 dpid, message
-    source_ip = message.ipv4_saddr.to_s
-    dest_ip = message.ipv4_daddr.to_s
-    puts "IPv4 from " + source_ip + " to " + dest_ip
+    source_ip = message.ipv4_saddr
+    dest_ip = message.ipv4_daddr
+    puts "IPv4 from " + source_ip.to_s + " to " + dest_ip.to_s
     port = @fdb_mac[message.macda.to_s]
     if port
-      send_packet_and_update_flow(dpid, message)
+      send_packet_and_flow(dpid, message)
     else
       packet_out(dpid, message, SendOutPort.new(OFPP_FLOOD))
     end
@@ -103,28 +102,33 @@ class LoadBarancerForLevel1 < Controller
   def flow_mod dpid, message, action
     send_flow_mod_add(
       dpid,
-      :hard_timeout => @hard_timeout,
+      :hard_timeout => 10,
       :match => ExactMatch.from(message),
       :actions => action
     )
   end
 
-  def send_packet_and_update_flow dpid, message
+  def send_packet_and_flow dpid, message
     daddr = message.ipv4_daddr.to_s
     action = 0
-    if @server_list.include?(daddr) 
-      dst_ip = @fine_server 
+    if daddr == @init_connect_server 
+      dst_ip = 0
+      if(@fdb_ip[@fine_server])
+        dst_ip = @fine_server
+      else
+        dst_ip = daddr
+      end
+      puts " --> to " + dst_ip
       dst_mac = @fdb_ip[dst_ip]
       port = @fdb_mac[dst_mac]
       action = create_action_from_dst(dst_ip, dst_mac, port)
-      puts " --> to " + dst_ip
     else
       # ACK
       src_ip = @init_connect_server
       src_mac = @fdb_ip[src_ip]
+      puts " --> from " + src_ip
       port = @fdb_mac[message.macda.to_s] 
       action = create_action_from_src(src_ip, src_mac, port)
-      puts " --> from " + src_ip
     end
     flow_mod(dpid, message, action)
     packet_out(dpid, message, action)

@@ -4,7 +4,8 @@ require "loadbalancer-utils"
 require "counter"
 class LoadBarancerForLevel1 < Controller
   include LoadBalancerUtils
-  periodic_timer_event(:show_fdb_and_server, 20)
+  periodic_timer_event(:show_counter, 10)
+  #periodic_timer_event(:show_fdb_and_server, 20)
 
   def start
     # fdb_mac(key, value) = (macaddr(string), port(int))
@@ -12,8 +13,11 @@ class LoadBarancerForLevel1 < Controller
     @fdb_mac = {}   
     @fdb_ip = {}
     @server_list = []
+    @fine_server_list = []
+    @ack_counter = Counter.new
+    @req_counter = Counter.new
     @made_server_list = 0 
-    @fine_server = "192.168.0.252"
+    @target_server = "192.168.0.252"
     @init_connect_server = "192.168.0.250"
     @my_ipaddr = "192.168.0.50"
     @hard_timeout = 10
@@ -36,11 +40,14 @@ class LoadBarancerForLevel1 < Controller
       handle_ipv4(dpid, message)
     else
       handle_initiate_packet(dpid)
-    end    
+    end
+    @ack_counter.add(message.macsa, 1, message.total_len)
+    @req_counter.add(message.macda, 1, message.total_len)
   end
 
   def flow_removed dpid, message
-    puts "flow removed!"
+    @ack_counter.add(message.match.dl_src, message.packet_count, message.byte_count)
+    @req_counter.add(message.match.dl_dst, message.packet_count, message.byte_count)
   end
   
   private
@@ -54,7 +61,7 @@ class LoadBarancerForLevel1 < Controller
   def handle_arp_request dpid, message
     source_ip = message.arp_spa.to_s
     target_ip = message.arp_tpa.to_s
-    puts "ARP Request from " + source_ip + " to " + target_ip
+    #puts "ARP Request from " + source_ip + " to " + target_ip
     @fdb_ip[source_ip] = message.macsa.to_s
     packet_out(dpid, message, SendOutPort.new(OFPP_FLOOD))
   end
@@ -74,7 +81,7 @@ class LoadBarancerForLevel1 < Controller
   def handle_arp_reply dpid, message
     source_ip = message.arp_spa.to_s
     target_ip = message.arp_tpa.to_s
-    puts "ARP Reply from " + source_ip + " to " + target_ip
+    #puts "ARP Reply from " + source_ip + " to " + target_ip
     @fdb_ip[source_ip] = message.macsa.to_s
     if target_ip == @my_ipaddr
       update_server_list(message)
@@ -118,8 +125,8 @@ class LoadBarancerForLevel1 < Controller
     action = 0
     if @server_list.include?(daddr) 
 # kono
-      dst_ip = "192.168.0.25" + @next_superserver.to_s
-      #dst_ip = @fine_server 
+      #dst_ip = "192.168.0.25" + @next_superserver.to_s
+      dst_ip = @target_server 
       dst_mac = @fdb_ip[dst_ip]
       port = @fdb_mac[dst_mac]
       action = create_action_from_dst(dst_ip, dst_mac, port)
@@ -180,6 +187,13 @@ class LoadBarancerForLevel1 < Controller
     puts ""
     puts "Server List is"
     puts " " + @server_list.join("\n ") 
+  end
+
+  def show_counter
+    puts "  show_counter"
+    @ack_counter.each_pair do | mac, counter|
+      puts "#{mac} #{counter[:packet_count]} packets (#{counter[:byte_count]} bytes)"
+    end
   end
  
   # 変数初期化  by河野

@@ -12,11 +12,12 @@ class LoadBarancerForLevel1 < Controller
     @fdb_mac = {}   
     @fdb_ip = {}
     @server_list = []
-    @made_server_list = 0 
-    @fine_server = "192.168.0.252"
-    @init_connect_server = "192.168.0.250"
+    @send_server_arpreq = 0 
+    @target_server = "192.168.0.252"
+    @reply_server = "192.168.0.250"
     @my_ipaddr = "192.168.0.50"
     @hard_timeout = 10
+    @list_point = 0
   end
 
   def switch_ready dpid
@@ -44,7 +45,7 @@ class LoadBarancerForLevel1 < Controller
   private
 
   def handle_initiate_packet dpid
-      if @made_server_list == 0
+      if @send_server_arpreq == 0
         send_arp_request_to_make_server_list(dpid)
       end
   end
@@ -66,7 +67,7 @@ class LoadBarancerForLevel1 < Controller
         IPAddr.new(@my_ipaddr))
       make_arp_request_packet(dpid, arp_request, SendOutPort.new(OFPP_FLOOD))
     end
-    @made_server_list = 1 
+    @send_server_arpreq = 1 
   end
 
   def handle_arp_reply dpid, message
@@ -77,8 +78,6 @@ class LoadBarancerForLevel1 < Controller
     if target_ip == @my_ipaddr
       update_server_list(message)
     else
-      #port = @fdb_mac[@fdb_ip[target_ip]]
-      #packet_out(dpid, message, SendOutPort.new(port))
       packet_out(dpid, message, SendOutPort.new(OFPP_FLOOD))
     end
   end
@@ -110,38 +109,38 @@ class LoadBarancerForLevel1 < Controller
   end
 
   def send_packet_and_update_flow dpid, message
-    daddr = message.ipv4_daddr.to_s
     action = 0
-    if @server_list.include?(daddr) 
-      dst_ip = @fine_server 
-      dst_mac = @fdb_ip[dst_ip]
-      port = @fdb_mac[dst_mac]
-      action = create_action_from_dst(dst_ip, dst_mac, port)
-      puts " --> to " + dst_ip
+    if @server_list.include?(message.ipv4_daddr.to_s) 
+      update_target_server 
+      dst_ip = @target_server 
+      action = create_action_from_dst(dst_ip)
     else
       # ACK
-      src_ip = @init_connect_server
-      src_mac = @fdb_ip[src_ip]
-      port = @fdb_mac[message.macda.to_s] 
-      action = create_action_from_src(src_ip, src_mac, port)
-      puts " --> from " + src_ip
+      src_ip = @reply_server
+      action = create_action_from_src(src_ip, message)
     end
     flow_mod(dpid, message, action)
     packet_out(dpid, message, action)
   end
 
-  def create_action_from_dst new_ip, new_mac, port
-    [
-      Trema::SetIpDstAddr.new(new_ip),
-      Trema::SetEthDstAddr.new(new_mac),
+  def create_action_from_dst dst_ip
+    dst_mac = @fdb_ip[dst_ip]
+    port = @fdb_mac[dst_mac]
+    puts " --> to " + dst_ip
+    return [
+      Trema::SetIpDstAddr.new(dst_ip),
+      Trema::SetEthDstAddr.new(dst_mac),
       Trema::SendOutPort.new(port)
     ]
   end
 
-  def create_action_from_src new_ip, new_mac, port
-    [
-      Trema::SetIpSrcAddr.new(new_ip),
-      Trema::SetEthSrcAddr.new(new_mac),
+  def create_action_from_src src_ip, message
+    src_mac = @fdb_ip[src_ip]
+    port = @fdb_mac[message.macda.to_s] 
+    puts " --> from " + src_ip
+    return [
+      Trema::SetIpSrcAddr.new(src_ip),
+      Trema::SetEthSrcAddr.new(src_mac),
       Trema::SendOutPort.new(port)
     ]
   end
@@ -173,4 +172,14 @@ class LoadBarancerForLevel1 < Controller
     puts "Server List is"
     puts " " + @server_list.join("\n ") 
   end
+ 
+  def update_target_server
+    if (@list_point == @server_list.length)
+      @list_point = 0
+    end
+    @target_server = @server_list[@list_point]
+    @list_point += 1
+  end
+
 end
+
